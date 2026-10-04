@@ -38,8 +38,8 @@ fun Calculator(modifier: Modifier = Modifier) {
         return if (value % 1.0 == 0.0) value.toLong().toString() else value.toString()
     }
 
-    fun applyOp(a: Double, b: Double, op: String): String {
-        val result = when (op) {
+    fun applyOp(a: Double, b: Double, operator: String): String {
+        val result = when (operator) {
             "+" -> a + b
             "-" -> a - b
             "x" -> a * b
@@ -69,7 +69,7 @@ fun Calculator(modifier: Modifier = Modifier) {
         }
     }
 
-    fun onOp(op: String) {
+    fun onOp(operator: String) {
         if (display == error) {
             clear()
             return
@@ -84,7 +84,7 @@ fun Calculator(modifier: Modifier = Modifier) {
         } else {
             operand = current
         }
-        pendingOp = op
+        pendingOp = operator
         startNew = true
     }
 
