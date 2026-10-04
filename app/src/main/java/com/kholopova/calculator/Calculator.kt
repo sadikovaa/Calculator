@@ -16,6 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 @Composable
 fun Calculator(modifier: Modifier = Modifier) {
@@ -33,7 +35,10 @@ fun Calculator(modifier: Modifier = Modifier) {
     }
 
     fun format(value: Double): String {
-        return if (value % 1.0 == 0.0) value.toLong().toString() else value.toString()
+        return BigDecimal.valueOf(value)
+            .setScale(12, RoundingMode.HALF_UP)
+            .stripTrailingZeros()
+            .toPlainString()
     }
 
     fun applyOperator(a: Double, b: Double, operator: String): String {
@@ -53,6 +58,8 @@ fun Calculator(modifier: Modifier = Modifier) {
             startNew = false
         } else if (display == "0") {
             display = digit
+        } else if (display == "-") {
+            display = "-$digit"
         } else {
             display += digit
         }
@@ -62,6 +69,8 @@ fun Calculator(modifier: Modifier = Modifier) {
         if (display == error || startNew) {
             display = "0."
             startNew = false
+        } else if (display == "-") {
+            display = "-0."
         } else if (!display.contains('.')) {
             display += "."
         }
@@ -72,6 +81,14 @@ fun Calculator(modifier: Modifier = Modifier) {
             clear()
             return
         }
+
+        if (operator == "-" && startNew) {
+            display = "-"
+            startNew = false
+            return
+        }
+        if (display == "-") return
+
         val current = display.toDoubleOrNull() ?: return
         val left = operand
         val pending = pendingOperator
