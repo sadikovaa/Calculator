@@ -2,11 +2,9 @@ package com.kholopova.calculator
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,13 +22,13 @@ fun Calculator(modifier: Modifier = Modifier) {
     val error = "NaN";
     var display by rememberSaveable { mutableStateOf("0") }
     var operand by rememberSaveable { mutableStateOf<Double?>(null) }
-    var pendingOp by rememberSaveable { mutableStateOf<String?>(null) }
+    var pendingOperator by rememberSaveable { mutableStateOf<String?>(null) }
     var startNew by rememberSaveable { mutableStateOf(true) }
 
     fun clear() {
         display = "0"
         operand = null
-        pendingOp = null
+        pendingOperator = null
         startNew = true
     }
 
@@ -38,7 +36,7 @@ fun Calculator(modifier: Modifier = Modifier) {
         return if (value % 1.0 == 0.0) value.toLong().toString() else value.toString()
     }
 
-    fun applyOp(a: Double, b: Double, operator: String): String {
+    fun applyOperator(a: Double, b: Double, operator: String): String {
         val result = when (operator) {
             "+" -> a + b
             "-" -> a - b
@@ -69,22 +67,36 @@ fun Calculator(modifier: Modifier = Modifier) {
         }
     }
 
-    fun onOp(operator: String) {
+    fun onOperator(operator: String) {
         if (display == error) {
             clear()
             return
         }
         val current = display.toDoubleOrNull() ?: return
         val left = operand
-        val pending = pendingOp
+        val pending = pendingOperator
         if (left != null && pending != null && !startNew) {
-            val result = applyOp(left, current, pending)
+            val result = applyOperator(left, current, pending)
             display = result
             operand = result.toDoubleOrNull()
         } else {
             operand = current
         }
-        pendingOp = operator
+        pendingOperator = operator
+        startNew = true
+    }
+
+    fun onEquals() {
+        if (display == error) {
+            clear()
+            return
+        }
+        val operator = pendingOperator ?: return
+        val left = operand ?: return
+        val current = display.toDoubleOrNull() ?: return
+        display = applyOperator(left, current, operator)
+        operand = null
+        pendingOperator = null
         startNew = true
     }
 
@@ -105,76 +117,20 @@ fun Calculator(modifier: Modifier = Modifier) {
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            Button(
-                onClick = { onDigit("7") },
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            ) {
-                Text("7", fontSize = 24.sp)
-            }
-            Button(
-                onClick = { onDigit("8") },
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            ) {
-                Text("8", fontSize = 24.sp)
-            }
-            Button(
-                onClick = { onDigit("9") },
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            ) {
-                Text("9", fontSize = 24.sp)
-            }
-            Button(
-                onClick = { onOp("+") },
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            ) {
-                Text("+", fontSize = 24.sp)
-            }
+            CalculatorButton("7", modifier = Modifier.weight(1f)) { onDigit("7") }
+            CalculatorButton("8", modifier = Modifier.weight(1f)) { onDigit("8") }
+            CalculatorButton("9", modifier = Modifier.weight(1f)) { onDigit("9") }
+            CalculatorButton("+", modifier = Modifier.weight(1f)) { onOperator("+") }
         }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            Button(
-                onClick = { onDigit("4") },
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            ) {
-                Text("4", fontSize = 24.sp)
-            }
-            Button(
-                onClick = { onDigit("5") },
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            ) {
-                Text("5", fontSize = 24.sp)
-            }
-            Button(
-                onClick = { onDigit("6") },
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            ) {
-                Text("6", fontSize = 24.sp)
-            }
-            Button(
-                onClick = { onOp("-") },
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            ) {
-                Text("-", fontSize = 24.sp)
-            }
+            CalculatorButton("4", modifier = Modifier.weight(1f)) { onDigit("4") }
+            CalculatorButton("5", modifier = Modifier.weight(1f)) { onDigit("5") }
+            CalculatorButton("6", modifier = Modifier.weight(1f)) { onDigit("6") }
+            CalculatorButton("-", modifier = Modifier.weight(1f)) { onOperator("-") }
         }
 
         Row(
@@ -182,76 +138,27 @@ fun Calculator(modifier: Modifier = Modifier) {
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            Button(
-                onClick = { onDigit("1") },
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            ) {
-                Text("1", fontSize = 24.sp)
-            }
-            Button(
-                onClick = { onDigit("2") },
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            ) {
-                Text("2", fontSize = 24.sp)
-            }
-            Button(
-                onClick = { onDigit("3") },
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            ) {
-                Text("3", fontSize = 24.sp)
-            }
-            Button(
-                onClick = { onOp("/") },
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            ) {
-                Text("/", fontSize = 24.sp)
-            }
+            CalculatorButton("1", modifier = Modifier.weight(1f)) { onDigit("1") }
+            CalculatorButton("2", modifier = Modifier.weight(1f)) { onDigit("2") }
+            CalculatorButton("3", modifier = Modifier.weight(1f)) { onDigit("3") }
+            CalculatorButton("/", modifier = Modifier.weight(1f)) { onOperator("/") }
         }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            Button(
-                onClick = { clear() },
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            ) {
-                Text("C", fontSize = 24.sp)
-            }
-            Button(
-                onClick = { onDigit("0") },
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            ) {
-                Text("0", fontSize = 24.sp)
-            }
-            Button(
-                onClick = { onDot() },
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            ) {
-                Text(".", fontSize = 24.sp)
-            }
-            Button(
-                onClick = { onOp("x") },
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            ) {
-                Text("x", fontSize = 24.sp)
-            }
+            CalculatorButton("C", modifier = Modifier.weight(1f)) { clear() }
+            CalculatorButton("0", modifier = Modifier.weight(1f)) { onDigit("0") }
+            CalculatorButton(".", modifier = Modifier.weight(1f)) { onDot() }
+            CalculatorButton("x", modifier = Modifier.weight(1f)) { onOperator("x") }
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
+            CalculatorButton("=", modifier = Modifier.weight(1f)) { onEquals() }
         }
 
     }
